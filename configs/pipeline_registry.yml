@@ -1,0 +1,118 @@
+# Pipeline Registry Configuration
+# Defines all available pipelines and their variants for benchmarking
+
+pipelines:
+  # nf-core/mag pipeline variants
+  nfcore_mag:
+    type: "nf-core"
+    repository: "nf-core/mag"
+    version: "3.1.0"
+    description: "Standard nf-core metagenome assembly and genome binning pipeline"
+    
+    variants:
+      standard:
+        description: "Default nf-core/mag configuration"
+        config: "configs/pipelines/nfcore_mag.config"
+        parameters:
+          assemblers: ["MEGAHIT", "SPAdes"]
+          binning_tools: ["MetaBAT2", "MaxBin2", "CONCOCT"]
+          
+      megahit_only:
+        description: "MEGAHIT assembly only"
+        config: "configs/pipelines/nfcore_mag.config"
+        parameters:
+          assemblers: ["MEGAHIT"]
+          binning_tools: ["MetaBAT2", "MaxBin2", "CONCOCT"]
+          skip_spades: true
+          
+      spades_only:
+        description: "SPAdes assembly only"
+        config: "configs/pipelines/nfcore_mag.config" 
+        parameters:
+          assemblers: ["SPAdes"]
+          binning_tools: ["MetaBAT2", "MaxBin2", "CONCOCT"]
+          skip_megahit: true
+          
+      ensemble_binning:
+        description: "All assemblers with DAS_Tool ensemble binning"
+        config: "configs/pipelines/nfcore_mag.config"
+        parameters:
+          assemblers: ["MEGAHIT", "SPAdes"]
+          binning_tools: ["MetaBAT2", "MaxBin2", "CONCOCT"]
+          refinement_tool: "DAS_Tool"
+
+  # Custom pipeline implementations
+  custom:
+    type: "custom"
+    description: "Custom optimized MAG pipeline"
+    
+    variants:
+      optimized_v1:
+        description: "Memory-optimized pipeline for large datasets"
+        definition: "pipelines/custom/my_mag_pipeline/"
+        config: "configs/pipelines/custom_pipeline.config"
+        
+      hybrid_approach:
+        description: "Hybrid approach combining multiple tools"
+        definition: "pipelines/custom/hybrid_approach/"
+        config: "configs/pipelines/custom_pipeline.config"
+
+  # External pipeline wrappers
+  metawrap:
+    type: "external"
+    description: "MetaWRAP metagenome analysis pipeline"
+    wrapper: "pipelines/external/metawrap/"
+    
+    variants:
+      standard:
+        description: "Standard MetaWRAP workflow"
+        config: "configs/pipelines/metawrap.config"
+        
+      fast_mode:
+        description: "Fast mode for quick analysis"
+        config: "configs/pipelines/metawrap.config"
+        parameters:
+          fast_mode: true
+
+  atlas:
+    type: "external" 
+    description: "ATLAS metagenome analysis pipeline"
+    wrapper: "pipelines/external/atlas/"
+    
+    variants:
+      standard:
+        description: "Standard ATLAS workflow"
+        config: "configs/pipelines/atlas.config"
+
+# Evaluation metrics configuration
+evaluation_metrics:
+  structural_integrity:
+    - checkm
+    - busco
+    - amber
+    
+  taxonomic_accuracy:
+    - gtdbtk
+    
+  functional_accuracy:
+    - eggnog_mapper
+    
+  resource_efficiency:
+    - cpu_usage
+    - memory_usage
+    - execution_time
+    - disk_usage
+
+# Benchmark datasets
+datasets:
+  cami2_mouse_gut:
+    type: "accuracy_benchmark"
+    description: "CAMI-2 Mouse Gut high complexity dataset"
+    ground_truth: true
+    samples: 5
+    
+  metasub_urban:
+    type: "robustness_benchmark" 
+    description: "MetaSUB urban environment samples"
+    ground_truth: false
+    samples: 10
